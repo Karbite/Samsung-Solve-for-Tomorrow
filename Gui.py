@@ -14,8 +14,9 @@ import time
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 
-PATH="C:\Program Files (x86)\Webdriver\chromedriver.exe"
+PATH="C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 
 window = tk.Tk()
@@ -43,47 +44,163 @@ tk.Label(window, image=img).grid(row=1, column=1)
 #panel = tk.Label(window, image=img)
 #panel.pack(side="left", fill = "both", expand = "yes", padx=100, pady=0)
 
+driver.get("https://data.rgj.com/covid-19-hospital-capacity/")
+
+# State Dropdown menu options
+states = []
+select = Select(WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "state"))))
+options = select.options
+for option in options:
+    states.append(option.text)
+
+counties = [
+    "All"
+    ]
+
+def sClicked(e):
+    state = sMenu.get()
+    print("State: " + state)
+    searchState = Select(driver.find_element_by_id("state"))
+    searchState.select_by_visible_text(state)
+    
+    print("Search County: " + "\n")
+    counties.clear()
+    # County Dropdown menu options
+    select = Select(WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "location"))))
+    options = select.options
+    for option in options:
+        print(option.text)
+        counties.append(option.text)
+    
+    cMenu.config(value=counties)
+    
+def cClicked(e):
+    state = sMenu.get()
+    print("State: " + state)
+    county = cMenu.get()
+    print("County: " + county)
+
 # Use ttk.Style to add a custom style to the widget. Standard tk does not have Style definition
 #lbl1 = tk.Label(window, text="Hospital")
-lbl1 = ttk.Label(window, text="Hospital", style='TLabel')
-lbl1.grid(row=2,column=0)
-txt1 = tk.Entry(window,width=50) 
-txt1.grid(row=2,column=1)
+stateLabel = ttk.Label(window, text="State", style='TLabel')
+stateLabel.grid(row=2,column=0)
+#txt1 = tk.Entry(window,width=50) 
+#txt1.grid(row=2,column=1)
+
+# State pulldown menu
+sMenu = ttk.Combobox(window, value=states)
+sMenu.current(4)
+sMenu.grid(row=2,column=1)
+sMenu.bind("<<ComboboxSelected>>", sClicked)
 
 #lbl2 = tk.Label(window, text="Search")
-lbl2 = ttk.Label(window, text="Search", style='TLabel')
-lbl2.grid(row=3,column=0)
-txt2 = tk.Entry(window,width=50)
-txt2.grid(row=3,column=1)
+countyLabel = ttk.Label(window, text="County", style='TLabel')
+countyLabel.grid(row=3,column=0)
+#txt2 = tk.Entry(window,width=50)
+#txt2.grid(row=3,column=1)
+
+# County pulldown menu
+cMenu = ttk.Combobox(window, value=counties)
+cMenu.current(0)
+cMenu.grid(row=3,column=1)
+cMenu.bind("<<ComboboxSelected>>", cClicked)
 
 def clicked():
-    res = txt1.get() + " " + txt2.get()
-    driver.get("https://bing.com")
-    print(driver.title)
-    search = driver.find_element_by_id("sb_form_q")
-    search.send_keys(res)
-    search.send_keys(Keys.RETURN)
+#    res = txt1.get() + " " + txt2.get()
+    state = sMenu.get()
+    county = cMenu.get()
+
+    driver.get("https://data.rgj.com/covid-19-hospital-capacity/")
+    #print(driver.title)
+    
+    searchState = Select(driver.find_element_by_id("state"))
+    searchState.select_by_visible_text(state)
+    #searchState.select_by_value(state)
+    
+    #searchCounty = Select(driver.find_element_by_id("carea"))
+    searchCounty = Select(WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "location"))))
+    #time.sleep(5)
+    searchCounty.select_by_value(county)
+  
+    submit = driver.find_element_by_id("submit")
+    submit.click()
+    
+    title = driver.title
+    
+    #searchState = driver.find_element_by_id("state")
+    #searchState.send_keys(state)
+    #searchCounty = driver.find_element_by_id("carea")
+    #searchCounty.send_keys(county)
+    
     #print(driver.page_source)
     
     try:
-        # b_algo = WebDriverWait(driver, 10).until(
-        #    EC.presence_of_element_located((By.CLASS_NAME, "b_algo")))
-        b_results = WebDriverWait(driver, 20).until(
-            EC.presence_of_element_located((By.ID, "b_results")))
-        print("Search results:")
-        print(b_results.text)
+        cnty = WebDriverWait(driver, 20).until(
+            EC.presence_of_element_located((By.ID, "cnty")))
+        print(title)
+        
+        # Clear the screen
+        text.config(state=tk.NORMAL)
+        text.delete('1.0', tk.END)
+        
+        text.insert(tk.END, str(title) + "\n")
+        # text.insert(tk.END, "Search results:" + "\n")
+        # print("Search results:")
+        
+        header = driver.find_element_by_class_name("panel-title")
+        data = header.text
+        print(data)
+        text.insert(tk.END, str(data) + "\n")
         
         print("Individual search:")
-        links = b_results.find_elements_by_tag_name("a")
+        cntys = driver.find_elements_by_id("cnty")
         # traverse list
-        for link in links:
-            # get_attribute() to get all href
-            href = link.get_attribute("href")
-            print(href)
-            text.insert(tk.END, str(href) + "\n")
+        for cnty in cntys:
+            
+            td = cnty.find_element_by_class_name("ac")
+            data = td.text
+            print(data)
+            text.insert(tk.END, str(data) + "\t")
+            
+            ac = cnty.find_element_by_class_name("ac.bg1")
+            td = ac.find_element_by_class_name("qt")
+            # td = cnty.find_element_by_class_name("qt")
+            data = td.text
+            print(data)
+            text.insert(tk.END, str(data) + "\t")
+            
+            ac = cnty.find_element_by_class_name("ac.bg2")
+            td = ac.find_element_by_class_name("qt")
+            # td = cnty.find_element_by_class_name("qt")
+            data = td.text
+            print(data)
+            text.insert(tk.END, str(data) + "\t")
+            
+            td = cnty.find_element_by_class_name("ac.bg3")
+            data = td.text
+            print(data)
+            text.insert(tk.END, str(data) + "\n")
+            
+            # identifying the rows having <td> tag
+            rwdata = cnty.find_elements_by_xpath("//table/tbody/tr/td")
+            # len method is used to get the size of that list
+            print(len(rwdata))
+            for r in rwdata:
+                print(r.text)
+                
+            #header = cnty.find_element_by_tags_name("h3")
+            #header = cnty.find_element_by_class_name("panel-title")
+            # get_attribute() to get all h3 class
+            #header = cnty.get_attribute("class")
+            #print(header)
+            #text.insert(tk.END, str(header) + "\n")
+            
+            #data = cnty.text          
+            #print(data)
+            #text.insert(tk.END, str(data) + "\n")
 
-#    except:
-    finally:
+    except:
+#    finally:
         driver.quit()
         
     # element = b_results.find_elements_by_partial_link_text("https")
@@ -107,4 +224,3 @@ scrollbar.config(command=text.yview)
 text.grid(row=7, column=1, padx=5, pady=5)
 
 window.mainloop()
-
