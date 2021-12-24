@@ -16,7 +16,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
-PATH="C:\Program Files (x86)\chromedriver.exe"
+# Use headless to not display the website
+# options = Options()
+# options.add_argument("--headless")
+PATH="C:\Program Files (x86)\Webdriver\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 
 window = tk.Tk()
