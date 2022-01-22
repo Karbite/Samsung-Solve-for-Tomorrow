@@ -9,6 +9,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import ImageTk, Image
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 import time
 from selenium.webdriver.common.by import By
@@ -16,11 +17,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 
-PATH="C:\Program Files (x86)\Webdriver\chromedriver.exe"
-driver = webdriver.Chrome(PATH)
+# Use headless to not display the website
+options = Options()
+options.add_argument("--headless")
+
+PATH= "C:\Program Files (x86)\Webdriver\chromedriver.exe"
+driver = webdriver.Chrome(PATH, options=options)
+
 
 window = tk.Tk()
-window.title("Mission San Jose High School - Chemistry Class - Ms Kuei")
+window.title("Med-Observer")
 
 window.geometry('1080x700')
 #frame = tk.Frame(window)
@@ -31,8 +37,8 @@ style = ttk.Style()
 style.configure('TLabel', font=('arial', 12, 'bold'), borderwidth='4', foreground='green')
 style.configure('TButton', font=('arial', 12, 'bold', 'underline'), borderwidth='4', foreground='green')
 
-students = tk.Label(window, text="Derrick Phung - Kushal Rajam - Sumanth Pallamreddy - Advisor: Ms Kuei")
-students.grid(row=0,column=1)
+# students = tk.Label(window, text="Derrick Phung - Kushal Rajam - Sumanth Pallamreddy - Advisor: Katy Kuei")
+# students.grid(row=0,column=1)
 
 # open Mission HS image
 mission = "C://Users/kevin/Documents/Samsung Solve for Tomorrow/msjhs.JPG"
@@ -96,7 +102,7 @@ def cClicked(e):
 
 # Use ttk.Style to add a custom style to the widget. Standard tk does not have Style definition
 #lbl1 = tk.Label(window, text="Hospital")
-stateLabel = ttk.Label(window, text="State", style='TLabel')
+stateLabel = ttk.Label(window, text="State", style='TLabel', anchor='w')
 stateLabel.grid(row=3,column=0)
 #txt1 = tk.Entry(window,width=50) 
 #txt1.grid(row=2,column=1)
@@ -118,7 +124,7 @@ countyLabel.grid(row=4,column=0)
 cMenu = ttk.Combobox(window, value=counties)
 cMenu.current(0)
 cMenu.grid(row=4,column=1)
-cMenu.bind("<<ComboboxSelected>>", cClicked)
+# cMenu.bind("<<ComboboxSelected>>", cClicked)
 
 def spin():
     # Clear the screen
